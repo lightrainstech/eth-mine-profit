@@ -1,0 +1,172 @@
+<html ng-app="ether">
+<title>Ethereum Mining Profitability Calculator</title>
+
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta name="title" content="Ethereum Mining Profitability Calculator">
+<meta name="keywords" content="ethereum mining calculator, ethereum profitability calculator, ethereum mining calc, eth mining calculator, ethereum calculator">
+<meta name="description" content="The best and more accurate ethereum mining calculator">
+
+
+<link rel="stylesheet" type="text/css" href="./css/semantic.min.css">
+
+
+<style>
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+</style>
+</head>
+
+<body ng-controller="EtherMiningCtrl" ng-cloak>
+  <div class="ui container">
+    <div class="row text-center">
+      <h1>Ethereum Mining Profitability Calculator</h1>
+    </div>
+  </div>
+
+  <div class="ui container">
+    <div class="ui divider hidden"></div>
+    <div class="ui divider hidden"></div>
+    <div class="ui equal width grid stackable">
+    <div class="column">
+      <h2>Calculator*</h2>
+      <form ng-submit="computeProfits()" class="ui form">
+        <div class="field">
+          <label>Enter hashrate</label>
+
+          <input 
+          type="text" 
+          class="ui fluid" 
+          ng-model="userHash" 
+          placeholder="Your hashrate in MH/s"
+          ng-change="computeProfits()"/>
+
+        </div>
+        <div class="field">
+          <label>Network hashrate</label>
+
+          <input 
+          type="text" 
+          class="ui fluid" 
+          ng-model="netHashGH" 
+          placeholder="Network Hashrate"
+          ng-change="computeProfits()"/>
+
+        </div>
+        <div class="field">
+          <label>Blocktime</label>
+
+          <input 
+          type="text" 
+          class="ui fluid" 
+          ng-model="blockTime" 
+          placeholder="Network Hashrate"
+          ng-change="computeProfits()"/>
+
+        </div>
+        <div class="field">
+          <label>1 ETH price</label>
+
+          <input 
+          type="text" 
+          class="ui fluid" 
+          ng-model="ethPrice" 
+          placeholder="Network Hashrate"
+          ng-change="computeProfits()"/>
+
+        </div>
+      </form>
+      <p class="text-muted">
+        Calculate how much Ether (ETH) <b>should</b> be mined with a specific hashrate.
+      </p>
+    </div>
+    <div class="column">
+      <h2>Earnings (ETH)</h2>
+
+      <table class="ui celled table">
+        <thead>
+          <tr>
+            <th class="col-lg-4">Period</th>
+            <th class="col-lg-4 text-center">ETH</th>
+            <th class="col-lg-4 text-center">USD</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Minute</td>
+            <td ng-bind="earnings.min | number:6"></td>
+            <td ng-bind="earnings.min*ethPrice | currency"></td>
+          </tr>
+          <tr>
+            <td>Hour</td>
+            <td ng-bind="earnings.hour | number:6"></td>
+            <td ng-bind="earnings.hour*ethPrice | currency"></td>
+          </tr>
+          <tr>
+            <td>Day</td>
+            <td ng-bind="earnings.day | number:6"></td>
+            <td ng-bind="earnings.day*ethPrice | currency"></td>
+          </tr>
+          <tr>
+            <td>Week</td>
+            <td ng-bind="earnings.week | number:6"></td>
+            <td ng-bind="earnings.week*ethPrice | currency"></td>
+          </tr>
+          <tr>
+            <td>Month</td>
+            <td ng-bind="earnings.month | number:6"></td>
+            <td ng-bind="earnings.month*ethPrice | currency"></td>
+          </tr>
+          <tr>
+            <td>Year</td>
+            <td ng-bind="earnings.year | number:6"></td>
+            <td ng-bind="earnings.year*ethPrice | currency"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-resource.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/2.0.7/bignumber.js"></script>
+  <script src="http://eth.lightrains.in/eth_stat.json"></script>
+  <script>
+
+  angular.module('ether', ['ngResource']).config(['$controllerProvider', function($controllerProvider) {
+    $controllerProvider.allowGlobals();
+  }]);
+
+  function EtherMiningCtrl($scope, $http, $log) {
+
+    $scope.ethPrice = ethereumStats.priceUsd;
+    $scope.netHashGH = (ethereumStats.difficulty / ethereumStats.blockTime) / 1e9;
+    $scope.blockTime = ethereumStats.blockTime;
+    $scope.earnings = {};
+
+    $scope.computeProfits = function() {
+      var userRatio = $scope.userHash * 1e6 / ($scope.netHashGH * 1e9);
+      var blocksPerMin = 60.0 / $scope.blockTime;
+      var ethPerMin = blocksPerMin * 5.0;
+      $scope.earnings.min = userRatio * ethPerMin;
+      $scope.earnings.hour = $scope.earnings.min * 60;
+      $scope.earnings.day = $scope.earnings.hour * 24;
+      $scope.earnings.week = $scope.earnings.day * 7;
+      $scope.earnings.month = $scope.earnings.day * 30;
+      $scope.earnings.year = $scope.earnings.day * 365;
+    };
+
+    $scope.updateUserHash = function() {
+      var value = $scope.userChoice;
+      $scope.userHash = value;
+      $scope.computeProfits();
+    };
+  }
+  </script>
+
+</body>
+</html>
