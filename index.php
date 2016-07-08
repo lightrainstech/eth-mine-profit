@@ -38,7 +38,7 @@ $record = array (
     'priceUsd' =>   $eth_decode['price']['usd'],
     'lastupdate' => time()     
 );
-$data = json_encode($record);
+$data = 'ethereumStats = ' . json_encode($record) . ";";
 $file = fopen("eth_stat.json","wa+");
 fwrite($file,$data);
 fclose($file);
